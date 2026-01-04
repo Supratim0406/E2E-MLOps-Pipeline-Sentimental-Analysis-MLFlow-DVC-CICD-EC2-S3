@@ -1,1 +1,1 @@
-# Supratim0406-E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-AWS-S3
+# E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-AWS-S3
