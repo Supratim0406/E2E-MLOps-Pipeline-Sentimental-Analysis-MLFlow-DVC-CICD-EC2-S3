@@ -29,4 +29,6 @@ jobs:
           dvc pull || true
 
       - name: Run DVC Pipeline
+        env:
+          CAPSTONE_TEST: ${{ secrets.CAPSTONE_TEST }}
         run: dvc repro
