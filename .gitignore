@@ -210,3 +210,4 @@ atlas
 cred.txt
 local-s3/
 models/
+data/
