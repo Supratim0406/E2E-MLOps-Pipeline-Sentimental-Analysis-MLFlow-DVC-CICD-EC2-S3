@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import pickle
@@ -11,25 +12,25 @@ from src.logger import logging
 
 # Below code block is for production use
 # -------------------------------------------------------------------------------------
-# # Set up DagsHub credentials for MLflow tracking
-# dagshub_token = os.getenv("CAPSTONE_TEST")
-# if not dagshub_token:
-#     raise EnvironmentError("CAPSTONE_TEST environment variable is not set")
+# Set up DagsHub credentials for MLflow tracking
+dagshub_token = os.getenv("CAPSTONE_TEST")
+if not dagshub_token:
+    raise EnvironmentError("CAPSTONE_TEST environment variable is not set")
 
-# os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
-# os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
 
-# dagshub_url = "https://dagshub.com"
-# repo_owner = "vikashdas770"
-# repo_name = "YT-Capstone-Project"
+dagshub_url = "https://dagshub.com"
+repo_owner = "Supratim0406"
+repo_name = "E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3"
 
-# # Set up MLflow tracking URI
-# mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
+# Set up MLflow tracking URI
+mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
 # -------------------------------------------------------------------------------------
 
 # Below code block is for local use
 # -------------------------------------------------------------------------------------
-dagshub.init(repo_owner='Supratim0406', repo_name='E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3', mlflow=True)
+# dagshub.init(repo_owner='Supratim0406', repo_name='E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3', mlflow=True)
 # -------------------------------------------------------------------------------------
 
 print("Tracking URI:", mlflow.get_tracking_uri())

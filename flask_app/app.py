@@ -69,31 +69,38 @@ def normalize_text(text):
 
 # Below code block is for local use
 # -------------------------------------------------------------------------------------
-# mlflow.set_tracking_uri('https://dagshub.com/vikashdas770/YT-Capstone-Project.mlflow')
-# dagshub.init(repo_owner='vikashdas770', repo_name='YT-Capstone-Project', mlflow=True)
+
+# -------------------------------------------------
+# Initialize DagsHub MLflow tracking
+# -------------------------------------------------
+# dagshub.init(
+#     repo_owner="Supratim0406",
+#     repo_name="E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3",
+#     mlflow=True
+# )
+
+# mlflow.set_tracking_uri(
+#     "https://dagshub.com/Supratim0406/E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3.mlflow"
+# )
+
+
 # -------------------------------------------------------------------------------------
-dagshub.init(
-    repo_owner="Supratim0406",
-    repo_name="E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3",
-    mlflow=True
-)
 
 # Below code block is for production use
 # -------------------------------------------------------------------------------------
-# # Set up DagsHub credentials for MLflow tracking
-# dagshub_token = os.getenv("CAPSTONE_TEST")
-# if not dagshub_token:
-#     raise EnvironmentError("CAPSTONE_TEST environment variable is not set")
 
-# os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
-# os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+dagshub_token = os.getenv("CAPSTONE_TEST")
+if not dagshub_token:
+    raise EnvironmentError("CAPSTONE_TEST environment variable is not set")
 
-# dagshub_url = "https://dagshub.com"
-# repo_owner = "vikashdas770"
-# repo_name = "YT-Capstone-Project"
-# # Set up MLflow tracking URI
-# mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
-# -------------------------------------------------------------------------------------
+os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+
+dagshub_url = "https://dagshub.com"
+repo_owner = "Supratim0406"
+repo_name = "E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3"
+
+mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
 
 
 # Initialize Flask app
@@ -120,18 +127,6 @@ import mlflow
 from mlflow.tracking import MlflowClient
 import dagshub
 
-# -------------------------------------------------
-# Initialize DagsHub MLflow tracking
-# -------------------------------------------------
-dagshub.init(
-    repo_owner="Supratim0406",
-    repo_name="E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3",
-    mlflow=True
-)
-
-mlflow.set_tracking_uri(
-    "https://dagshub.com/Supratim0406/E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3.mlflow"
-)
 
 # -------------------------------------------------
 # Load latest version of registered model

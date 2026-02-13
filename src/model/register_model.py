@@ -1,5 +1,5 @@
 # register_model.py
-
+import os
 import json
 import mlflow
 import dagshub
@@ -13,11 +13,29 @@ warnings.filterwarnings("ignore")
 # -------------------------------------------------------------
 # Initialize DagsHub MLflow tracking
 # -------------------------------------------------------------
-dagshub.init(
-    repo_owner="Supratim0406",
-    repo_name="E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3",
-    mlflow=True
-)
+
+# Below code block is for production use
+# -------------------------------------------------------------------------------------
+# Set up DagsHub credentials for MLflow tracking
+dagshub_token = os.getenv("CAPSTONE_TEST")
+if not dagshub_token:
+    raise EnvironmentError("CAPSTONE_TEST environment variable is not set")
+
+os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+
+dagshub_url = "https://dagshub.com"
+repo_owner = "Supratim0406"
+repo_name = "E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3"
+
+# Set up MLflow tracking URI
+mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
+
+# dagshub.init(
+#     repo_owner="Supratim0406",
+#     repo_name="E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3",
+#     mlflow=True
+# )
 # -------------------------------------------------------------
 
 
