@@ -1,18 +1,14 @@
-# register_model.py
-import os
+# register model
 import json
 import mlflow
-import dagshub
-from mlflow.tracking import MlflowClient
+import logging
 from src.logger import logging
-import warnings
+import os
+import dagshub
 
+import warnings
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore")
-
-# -------------------------------------------------------------
-# Initialize DagsHub MLflow tracking
-# -------------------------------------------------------------
 
 # Below code block is for production use
 # -------------------------------------------------------------------------------------
@@ -25,76 +21,70 @@ os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
 os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
 
 dagshub_url = "https://dagshub.com"
-repo_owner = "Supratim0406"
-repo_name = "E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3"
+repo_owner = "vikashdas770"
+repo_name = "YT-Capstone-Project"
 
 # Set up MLflow tracking URI
 mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
+# -------------------------------------------------------------------------------------
 
+
+# Below code block is for local use
+# -------------------------------------------------------------------------------------
+# mlflow.set_tracking_uri('https://dagshub.com/vikashdas770/YT-Capstone-Project.mlflow')
 # dagshub.init(
 #     repo_owner="Supratim0406",
 #     repo_name="E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3",
 #     mlflow=True
 # )
-# -------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 
 
 def load_model_info(file_path: str) -> dict:
-    """Load run_id from experiment_info.json"""
+    """Load the model info from a JSON file."""
     try:
-        with open(file_path, "r") as f:
-            model_info = json.load(f)
-        logging.info("Model info loaded from %s", file_path)
+        with open(file_path, 'r') as file:
+            model_info = json.load(file)
+        logging.debug('Model info loaded from %s', file_path)
         return model_info
+    except FileNotFoundError:
+        logging.error('File not found: %s', file_path)
+        raise
     except Exception as e:
-        logging.error("Failed to load model info: %s", e)
+        logging.error('Unexpected error occurred while loading the model info: %s', e)
         raise
 
-
 def register_model(model_name: str, model_info: dict):
+    """Register the model to the MLflow Model Registry."""
     try:
-        run_id = model_info["run_id"]
-
-        # Must match artifact_path used in log_model()
-        model_uri = f"runs:/{run_id}/model"
-        print("Registering model from:", model_uri)
-
-        model_version = mlflow.register_model(
-            model_uri=model_uri,
-            name=model_name
-        )
-
-        client = MlflowClient()
-
-        # Move to Staging
+        model_uri = f"runs:/{model_info['run_id']}/{model_info['model_path']}"
+        
+        # Register the model
+        model_version = mlflow.register_model(model_uri, model_name)
+        
+        # Transition the model to "Staging" stage
+        client = mlflow.tracking.MlflowClient()
         client.transition_model_version_stage(
             name=model_name,
             version=model_version.version,
             stage="Staging"
         )
-
-        print(
-            f"Model {model_name} v{model_version.version} moved to Staging."
-        )
-
+        
+        logging.debug(f'Model {model_name} version {model_version.version} registered and transitioned to Staging.')
     except Exception as e:
-        logging.error("Model registration failed: %s", e)
+        logging.error('Error during model registration: %s', e)
         raise
-
 
 def main():
     try:
-        model_info = load_model_info("reports/experiment_info.json")
-
-        register_model(
-            model_name="final_model",
-            model_info=model_info
-        )
-
+        model_info_path = 'reports/experiment_info.json'
+        model_info = load_model_info(model_info_path)
+        
+        model_name = "final_model"
+        register_model(model_name, model_info)
     except Exception as e:
-        logging.error("Registration pipeline failed: %s", e)
+        logging.error('Failed to complete the model registration process: %s', e)
         print(f"Error: {e}")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

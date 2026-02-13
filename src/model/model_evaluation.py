@@ -1,15 +1,17 @@
-import os
 import numpy as np
 import pandas as pd
 import pickle
 import json
 from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score
+import logging
 import mlflow
 import mlflow.sklearn
 import dagshub
+import os
 from src.logger import logging
 
 
+# -------------------------------------------------------------------------------------
 # Below code block is for production use
 # -------------------------------------------------------------------------------------
 # Set up DagsHub credentials for MLflow tracking
@@ -26,15 +28,13 @@ repo_name = "E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3"
 
 # Set up MLflow tracking URI
 mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
-# -------------------------------------------------------------------------------------
 
-# Below code block is for local use
+# dagshub.init(
+#     repo_owner="Supratim0406",
+#     repo_name="E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3",
+#     mlflow=True
+# )
 # -------------------------------------------------------------------------------------
-# dagshub.init(repo_owner='Supratim0406', repo_name='E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3', mlflow=True)
-# -------------------------------------------------------------------------------------
-
-print("Tracking URI:", mlflow.get_tracking_uri())
-
 
 def load_model(file_path: str):
     """Load the trained model from a file."""
@@ -107,50 +107,42 @@ def save_model_info(run_id: str, model_path: str, file_path: str) -> None:
         logging.error('Error occurred while saving the model info: %s', e)
         raise
 
-
 def main():
-    mlflow.set_experiment("MLOps-dvc-pipeline")
-
-    try:
-        import os
-        os.makedirs("reports", exist_ok=True)
-        clf = load_model('./models/model.pkl')
-        print("Model type:", type(clf))  # DEBUG
-
-        test_data = load_data('./data/processed/test_bow.csv')
-
-        X_test = test_data.iloc[:, :-1].values
-        y_test = test_data.iloc[:, -1].values
-
-        with mlflow.start_run() as run:
+    mlflow.set_experiment("my-dvc-pipeline")
+    with mlflow.start_run() as run:  # Start an MLflow run
+        try:
+            clf = load_model('./models/model.pkl')
+            test_data = load_data('./data/processed/test_bow.csv')
+            
+            X_test = test_data.iloc[:, :-1].values
+            y_test = test_data.iloc[:, -1].values
 
             metrics = evaluate_model(clf, X_test, y_test)
+            
+            save_metrics(metrics, 'reports/metrics.json')
+            
+            # Log metrics to MLflow
+            for metric_name, metric_value in metrics.items():
+                mlflow.log_metric(metric_name, metric_value)
+            
+            # Log model parameters to MLflow
+            if hasattr(clf, 'get_params'):
+                params = clf.get_params()
+                for param_name, param_value in params.items():
+                    mlflow.log_param(param_name, param_value)
+            
+            # Log model to MLflow
+            mlflow.sklearn.log_model(clf, "model")
+            
+            # Save model info
+            save_model_info(run.info.run_id, "model", 'reports/experiment_info.json')
+            
+            # Log the metrics file to MLflow
+            mlflow.log_artifact('reports/metrics.json')
 
-            save_metrics(metrics, "reports/metrics.json")
-            mlflow.log_metrics(metrics)
-
-            if hasattr(clf, "get_params"):
-                mlflow.log_params(clf.get_params())
-
-            # 🔥 THIS MUST EXECUTE
-            mlflow.sklearn.log_model(
-                sk_model=clf,
-                artifact_path="model"
-            )
-
-            print("Model successfully logged.")
-
-            save_model_info(
-                run.info.run_id,
-                "model",
-                "reports/experiment_info.json"
-            )
-
-            mlflow.log_artifact("reports/metrics.json")
-
-    except Exception:
-        logging.exception("Evaluation failed")
-        raise
+        except Exception as e:
+            logging.error('Failed to complete the model evaluation process: %s', e)
+            print(f"Error: {e}")
 
 if __name__ == '__main__':
     main()

@@ -73,6 +73,7 @@ def normalize_text(text):
 # -------------------------------------------------
 # Initialize DagsHub MLflow tracking
 # -------------------------------------------------
+# This is for LOCAL Use
 # dagshub.init(
 #     repo_owner="Supratim0406",
 #     repo_name="E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3",
@@ -123,36 +124,48 @@ PREDICTION_COUNT = Counter(
 )
 
 # ------------------------------------------------------------------------------------------
-import mlflow
-from mlflow.tracking import MlflowClient
-import dagshub
+# Model and vectorizer setup
+# ------------------------------------------------------------------------------------------
+# Model setup (Using Alias "Staging" + fallback to latest version)
+# ------------------------------------------------------------------------------------------
 
-
-# -------------------------------------------------
-# Load latest version of registered model
-# -------------------------------------------------
 model_name = "final_model"
-client = MlflowClient()
+client = mlflow.MlflowClient()
 
-versions = client.search_model_versions(f"name='{model_name}'")
+def load_model_from_registry(model_name):
+    try:
+        # 🔥 Try loading from alias "Staging"
+        model_uri = f"models:/{model_name}@Staging"
+        print(f"Trying to fetch model from alias: {model_uri}")
+        return mlflow.pyfunc.load_model(model_uri)
 
-if not versions:
-    raise Exception(f"No versions found for model '{model_name}'")
+    except Exception as e:
+        print("Alias 'Staging' not found. Falling back to latest version...")
+        
+        # 🔥 Fallback: get latest version number
+        versions = client.search_model_versions(f"name='{model_name}'")
+        
+        if not versions:
+            raise Exception(f"No versions found for model '{model_name}'")
 
-# Sort by version number (descending)
-latest_version = sorted(
-    versions,
-    key=lambda x: int(x.version),
-    reverse=True
-)[0]
+        # Sort versions numerically
+        latest_version = sorted(
+            versions, 
+            key=lambda x: int(x.version), 
+            reverse=True
+        )[0].version
 
-model_uri = f"models:/{model_name}/{latest_version.version}"
+        model_uri = f"models:/{model_name}/{latest_version}"
+        print(f"Fetching latest model version: {model_uri}")
+        return mlflow.pyfunc.load_model(model_uri)
 
-print("Loading model from:", model_uri)
 
-model = mlflow.pyfunc.load_model(model_uri)
+# Load model
+model = load_model_from_registry(model_name)
 
+# Load vectorizer (local)
 vectorizer = pickle.load(open('models/vectorizer.pkl', 'rb'))
+
 
 # Routes
 @app.route("/")
