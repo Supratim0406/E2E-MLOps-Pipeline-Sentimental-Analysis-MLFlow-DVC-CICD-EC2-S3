@@ -209,3 +209,5 @@ __marimo__/
 atlas
 cred.txt
 local-s3/
+data/
+models/
