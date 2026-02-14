@@ -23,11 +23,6 @@ jobs:
           pip install -r requirements.txt
           pip install dvc[s3]
 
-      # If using DVC remote storage
-      - name: Configure DVC
-        run: |
-          dvc pull || true
-
       - name: Run DVC Pipeline
         env:
           CAPSTONE_TEST: ${{ secrets.CAPSTONE_TEST }}
