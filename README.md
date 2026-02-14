@@ -274,7 +274,7 @@ http://<ec2-public-ip>:3000
 
 ## 🎥 Demo
 
-![▶️ Watch Demo Video(https://github.com/user-attachments/assets/3b5910ca-b61b-4aaf-8989-530455241954)
+[▶️ Watch Demo Video](https://github.com/user-attachments/assets/3b5910ca-b61b-4aaf-8989-530455241954)
 
 ## 🏁 Final Architecture
 ---
