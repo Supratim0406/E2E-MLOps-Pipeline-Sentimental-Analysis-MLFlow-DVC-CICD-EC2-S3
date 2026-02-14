@@ -67,13 +67,12 @@ def normalize_text(text):
 
     return text
 
-# Below code block is for local use
-# -------------------------------------------------------------------------------------
-
 # -------------------------------------------------
 # Initialize DagsHub MLflow tracking
 # -------------------------------------------------
-# This is for LOCAL Use
+
+# Below code block is for local use
+# -------------------------------------------------------------------------------------
 # dagshub.init(
 #     repo_owner="Supratim0406",
 #     repo_name="E2E-MLOps-Pipeline-Sentimental-Analysis-MLFlow-DVC-CICD-EC2-S3",
@@ -130,42 +129,55 @@ PREDICTION_COUNT = Counter(
 # ------------------------------------------------------------------------------------------
 
 model_name = "final_model"
-client = mlflow.MlflowClient()
+# client = mlflow.MlflowClient()
 
-def load_model_from_registry(model_name):
-    try:
-        # 🔥 Try loading from alias "Staging"
-        model_uri = f"models:/{model_name}@Staging"
-        print(f"Trying to fetch model from alias: {model_uri}")
-        return mlflow.pyfunc.load_model(model_uri)
+# def load_model_from_registry(model_name):
+#     try:
+#         # 🔥 Try loading from alias "Staging"
+#         model_uri = f"models:/{model_name}@Staging"
+#         print(f"Trying to fetch model from alias: {model_uri}")
+#         return mlflow.pyfunc.load_model(model_uri)
 
-    except Exception as e:
-        print("Alias 'Staging' not found. Falling back to latest version...")
+#     except Exception as e:
+#         print("Alias 'Staging' not found. Falling back to latest version...")
         
-        # 🔥 Fallback: get latest version number
-        versions = client.search_model_versions(f"name='{model_name}'")
+#         # 🔥 Fallback: get latest version number
+#         versions = client.search_model_versions(f"name='{model_name}'")
         
-        if not versions:
-            raise Exception(f"No versions found for model '{model_name}'")
+#         if not versions:
+#             raise Exception(f"No versions found for model '{model_name}'")
 
-        # Sort versions numerically
-        latest_version = sorted(
-            versions, 
-            key=lambda x: int(x.version), 
-            reverse=True
-        )[0].version
+#         # Sort versions numerically
+#         latest_version = sorted(
+#             versions, 
+#             key=lambda x: int(x.version), 
+#             reverse=True
+#         )[0].version
 
-        model_uri = f"models:/{model_name}/{latest_version}"
-        print(f"Fetching latest model version: {model_uri}")
-        return mlflow.pyfunc.load_model(model_uri)
+#         model_uri = f"models:/{model_name}/{latest_version}"
+#         print(f"Fetching latest model version: {model_uri}")
+#         return mlflow.pyfunc.load_model(model_uri)
 
 
-# Load model
-model = load_model_from_registry(model_name)
+# # Load model
+# model = load_model_from_registry(model_name)
 
-# Load vectorizer (local)
+# # Load vectorizer (local)
+# vectorizer = pickle.load(open('models/vectorizer.pkl', 'rb'))
+
+# This is to get latest version from Production
+def get_latest_model_version(model_name):
+    client = mlflow.MlflowClient()
+    latest_version = client.get_latest_versions(model_name, stages=["Production"])
+    if not latest_version:
+        latest_version = client.get_latest_versions(model_name, stages=["None"])
+    return latest_version[0].version if latest_version else None
+
+model_version = get_latest_model_version(model_name)
+model_uri = f'models:/{model_name}/{model_version}'
+print(f"Fetching model from: {model_uri}")
+model = mlflow.pyfunc.load_model(model_uri)
 vectorizer = pickle.load(open('models/vectorizer.pkl', 'rb'))
-
 
 # Routes
 @app.route("/")
