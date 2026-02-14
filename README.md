@@ -137,10 +137,13 @@ pip freeze > requirements.txt
 ```
 ### Flask Application
 <img width="1486" height="923" alt="image" src="https://github.com/user-attachments/assets/94352a9f-48af-45ef-9362-e90df3df9ea6" />
+
 ### MLFLOW
 <img width="1908" height="842" alt="image" src="https://github.com/user-attachments/assets/59f11b89-ca06-45c2-b8b0-4b53e98d6c27" />
+
 ### Prometheus
 <img width="1913" height="746" alt="image" src="https://github.com/user-attachments/assets/fbe1a5b3-0544-4693-8de4-cc8c9b7f6897" />
+
 ### Grafana Dashboard
 <img width="1910" height="947" alt="image" src="https://github.com/user-attachments/assets/e706c893-1534-4a39-9a0f-ee4863c8790d" />
 <img width="1919" height="906" alt="image" src="https://github.com/user-attachments/assets/f6754756-96b3-4c58-a045-7b5e4c5e5f20" />
