@@ -271,6 +271,11 @@ http://<ec2-public-ip>:3000
 ### (Default credentials: admin/admin)
 - Add Prometheus as a data source and create dashboards for metrics.
 ---
+
+## 🎥 Demo
+
+![▶️ Watch Demo Video(https://github.com/user-attachments/assets/3b5910ca-b61b-4aaf-8989-530455241954)
+
 ## 🏁 Final Architecture
 ---
                  ┌──────────────────────────┐
