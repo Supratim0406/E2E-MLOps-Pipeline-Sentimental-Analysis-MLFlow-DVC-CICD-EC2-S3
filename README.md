@@ -1,4 +1,4 @@
-# 🎬 Production-Grade Movie Sentiment Analysis using MLOps on AWS
+# 🎬 Production-Grade Product ReviewSentiment Analysis using MLOps on AWS
 
 This repository demonstrates an **end-to-end production-grade MLOps pipeline** for movie sentiment classification — fully automated, containerized, deployed, and monitored using **AWS cloud services** and **DevOps tools**.  
 It follows a modern MLOps architecture integrating **DVC**, **MLflow**, **Docker**, **GitHub Actions (CI/CD)**, **Kubernetes (EKS)**, **Prometheus**, and **Grafana**.
